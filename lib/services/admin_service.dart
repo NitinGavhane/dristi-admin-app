@@ -9,6 +9,7 @@ import '../models/order.dart';
 import '../models/coupon.dart';
 import '../models/banner.dart';
 import '../models/payment_method.dart';
+import '../models/contact.dart';
 import '../models/delivery_settings.dart';
 import '../models/referral.dart';
 import 'api_service.dart';
@@ -133,6 +134,30 @@ class AdminService {
     final response = await _api.get(ApiConfig.adminReferralUserReport);
     return (response.data as List)
         .map((e) => ReferralUserReport.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  // Website enquiries and newsletter signups. The store's domain has no
+  // mailbox, so this screen is how the seller actually receives them.
+  Future<List<ContactMessage>> getContactMessages() async {
+    final response = await _api.get(ApiConfig.adminContactMessages);
+    return (response.data as List)
+        .map((e) => ContactMessage.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<void> markContactMessageRead(String id, {bool isRead = true}) async {
+    await _api.put(ApiConfig.adminContactMessageRead(id, isRead: isRead));
+  }
+
+  Future<void> deleteContactMessage(String id) async {
+    await _api.delete(ApiConfig.adminContactMessage(id));
+  }
+
+  Future<List<NewsletterSubscriber>> getNewsletterSubscribers() async {
+    final response = await _api.get(ApiConfig.adminNewsletterSubscribers);
+    return (response.data as List)
+        .map((e) => NewsletterSubscriber.fromJson(e as Map<String, dynamic>))
         .toList();
   }
 

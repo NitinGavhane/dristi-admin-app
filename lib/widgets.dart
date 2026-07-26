@@ -588,6 +588,7 @@ class AdminNavPanel extends StatelessWidget {
                   _navItem(Icons.account_balance_wallet, 'Payment Methods', '/payment-methods', context),
                   _navItem(Icons.local_shipping, 'Delivery', '/delivery-settings', context),
                   _navItem(Icons.share_outlined, 'Referrals', '/referrals', context),
+                  _navItem(Icons.mail_outline, 'Messages', '/messages', context),
                 ],
               ),
             ),

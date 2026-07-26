@@ -26,6 +26,11 @@ class ApiConfig {
   static String adminReferralReject(String id) =>
       '$apiPrefix/admin/referral-purchases/$id/reject';
   static const String adminReferralUserReport = '$apiPrefix/admin/referral-reports/user';
+  static const String adminContactMessages = '$apiPrefix/admin/contact-messages';
+  static String adminContactMessage(String id) => '$apiPrefix/admin/contact-messages/$id';
+  static String adminContactMessageRead(String id, {bool isRead = true}) =>
+      '$apiPrefix/admin/contact-messages/$id/read?is_read=$isRead';
+  static const String adminNewsletterSubscribers = '$apiPrefix/admin/newsletter-subscribers';
 
   // Public endpoints (used for admin list/detail views)
   static const String products = '$apiPrefix/products';
