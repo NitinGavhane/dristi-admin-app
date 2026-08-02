@@ -20,6 +20,8 @@ import 'screens/banner_form_screen.dart';
 import 'screens/payment_methods_screen.dart';
 import 'screens/payment_method_form_screen.dart';
 import 'screens/delivery_settings_screen.dart';
+import 'screens/delivery_screen.dart';
+import 'screens/returns_screen.dart';
 import 'screens/referrals_screen.dart';
 import 'screens/messages_screen.dart';
 
@@ -195,6 +197,8 @@ class AdminApp extends StatelessWidget {
             '/payment-methods': (_) => const PaymentMethodsScreen(),
             '/payment-method-form': (_) => const PaymentMethodFormScreen(),
             '/delivery-settings': (_) => const DeliverySettingsScreen(),
+            '/delivery': (_) => const DeliveryScreen(),
+            '/returns': (_) => const ReturnsScreen(),
             '/referrals': (_) => const ReferralsScreen(),
             '/messages': (_) => const MessagesScreen(),
           },

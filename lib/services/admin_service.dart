@@ -12,6 +12,7 @@ import '../models/payment_method.dart';
 import '../models/contact.dart';
 import '../models/delivery_settings.dart';
 import '../models/referral.dart';
+import '../models/fulfillment.dart';
 import 'api_service.dart';
 
 class AdminService {
@@ -234,6 +235,46 @@ class AdminService {
       ApiConfig.adminOrderStatus(orderId),
       data: {'status': status},
     );
+  }
+
+  // Fulfilment: dispatch + delivery OTP, and the returns queue.
+  Future<List<FulfillmentOrder>> getDeliveryOrders() async {
+    final response = await _api.get(ApiConfig.adminDelivery);
+    return (response.data as List)
+        .map((e) => FulfillmentOrder.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Dispatches the order; returns the delivery OTP the operator relays to the
+  /// customer. The OTP is not stored in the model — it is a one-time relay.
+  Future<Map<String, dynamic>> dispatchOrder(String orderId) async {
+    final response = await _api.post(ApiConfig.adminDeliveryDispatch(orderId));
+    return (response.data as Map<String, dynamic>?) ?? {};
+  }
+
+  Future<void> verifyDeliveryOtp(String orderId, String otp) async {
+    await _api.post(ApiConfig.adminDeliveryVerify(orderId), data: {'otp': otp});
+  }
+
+  Future<List<FulfillmentOrder>> getReturnOrders() async {
+    final response = await _api.get(ApiConfig.adminReturns);
+    return (response.data as List)
+        .map((e) => FulfillmentOrder.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// Approves a return; returns the pickup OTP for relaying to the customer.
+  Future<Map<String, dynamic>> approveReturn(String orderId) async {
+    final response = await _api.post(ApiConfig.adminReturnApprove(orderId));
+    return (response.data as Map<String, dynamic>?) ?? {};
+  }
+
+  Future<void> rejectReturn(String orderId, String reason) async {
+    await _api.post(ApiConfig.adminReturnReject(orderId), data: {'reason': reason});
+  }
+
+  Future<void> verifyReturnPickup(String orderId, String otp) async {
+    await _api.post(ApiConfig.adminReturnPickup(orderId), data: {'otp': otp});
   }
 
   // Coupons

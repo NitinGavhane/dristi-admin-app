@@ -8,6 +8,13 @@ class ApiConfig {
   static const String adminUsers = '$apiPrefix/admin/users';
   static const String adminOrders = '$apiPrefix/admin/orders';
   static String adminOrderStatus(String id) => '$apiPrefix/admin/orders/$id/status';
+  static const String adminDelivery = '$apiPrefix/admin/delivery';
+  static String adminDeliveryDispatch(String id) => '$apiPrefix/admin/delivery/$id/dispatch';
+  static String adminDeliveryVerify(String id) => '$apiPrefix/admin/delivery/$id/verify';
+  static const String adminReturns = '$apiPrefix/admin/returns';
+  static String adminReturnApprove(String id) => '$apiPrefix/admin/returns/$id/approve';
+  static String adminReturnReject(String id) => '$apiPrefix/admin/returns/$id/reject';
+  static String adminReturnPickup(String id) => '$apiPrefix/admin/returns/$id/pickup';
   static const String adminProducts = '$apiPrefix/admin/products';
   static String adminProduct(String id) => '$apiPrefix/admin/products/$id';
   static const String adminCategories = '$apiPrefix/admin/categories';
