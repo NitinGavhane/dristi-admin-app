@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../config/theme.dart';
 import '../models/fulfillment.dart';
 import '../services/api_service.dart';
@@ -192,10 +193,23 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
           const SizedBox(height: 4),
           Text(o.shippingAddress!, style: TextStyle(color: AppColors.textMuted, fontSize: 11), maxLines: 2, overflow: TextOverflow.ellipsis),
         ],
+        if (o.awbCode != null || o.courierName != null) ...[
+          const SizedBox(height: 8),
+          if (o.courierName != null)
+            Text('Courier: ${o.courierName}', style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w600, fontSize: 12)),
+          if (o.awbCode != null)
+            Text('AWB: ${o.awbCode}', style: TextStyle(color: AppColors.textMuted, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
+          if (o.shipmentStatus != null)
+            Text('Status: ${o.shipmentStatus}', style: TextStyle(color: AppColors.success, fontSize: 12)),
+        ],
         const SizedBox(height: 10),
         Row(children: [
           Text('₹${o.finalAmount.toStringAsFixed(2)}', style: const TextStyle(color: AppColors.coral, fontWeight: FontWeight.w900, fontSize: 16)),
           const Spacer(),
+          if (o.trackingUrl != null) ...[
+            FashionButton(label: 'Track', color: AppColors.info, icon: Icons.local_shipping, onPressed: () => _track(o.trackingUrl!)),
+            const SizedBox(width: 8),
+          ],
           if (dispatch)
             FashionButton(label: 'Dispatch', color: AppColors.success, icon: Icons.local_shipping, onPressed: () => _dispatch(o))
           else
@@ -203,5 +217,16 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
         ]),
       ]),
     );
+  }
+
+  Future<void> _track(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return;
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString().substring(0, e.toString().length > 90 ? 90 : e.toString().length))));
+    }
   }
 }

@@ -61,6 +61,11 @@ class FulfillmentOrder {
   final DateTime? deliveredAt;
   final List<String> returnEvidence;
   final List<FulfillmentItem> items;
+  // ShipRocket courier tracking (populated once the order is dispatched).
+  final String? awbCode;
+  final String? courierName;
+  final String? shipmentStatus;
+  final String? trackingUrl;
 
   FulfillmentOrder({
     required this.id,
@@ -78,6 +83,10 @@ class FulfillmentOrder {
     this.deliveredAt,
     this.returnEvidence = const [],
     this.items = const [],
+    this.awbCode,
+    this.courierName,
+    this.shipmentStatus,
+    this.trackingUrl,
   });
 
   factory FulfillmentOrder.fromJson(Map<String, dynamic> json) {
@@ -100,6 +109,10 @@ class FulfillmentOrder {
               ?.map((e) => FulfillmentItem.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
+      awbCode: json['awb_code'] as String?,
+      courierName: json['courier_name'] as String?,
+      shipmentStatus: json['shipment_status'] as String?,
+      trackingUrl: json['tracking_url'] as String?,
     );
   }
 
