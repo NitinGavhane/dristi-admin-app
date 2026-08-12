@@ -84,6 +84,10 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
       final res = await _admin.dispatchOrder(o.id);
       if (!mounted) return;
       final otp = res['delivery_otp'] as String? ?? '';
+      final courier = (res['courier'] as Map<String, dynamic>?) ?? {};
+      final courierError = res['courier_error'] as String?;
+      final awb = courier['awb_code'] as String?;
+      final courierName = courier['courier_name'] as String?;
       _load();
       await showDialog<void>(
         context: context,
@@ -97,6 +101,17 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
           ]),
           content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text('#${o.orderNumber}', style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+            if (courierError != null) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(color: AppColors.warning.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(8)),
+                child: Text('Courier: $courierError', style: TextStyle(color: AppColors.warning, fontSize: 12, fontWeight: FontWeight.w600)),
+              ),
+            ] else if (awb != null) ...[
+              const SizedBox(height: 12),
+              Text('Courier: ${courierName ?? '--'}  ·  AWB: $awb', style: TextStyle(color: AppColors.success, fontSize: 12, fontWeight: FontWeight.w600)),
+            ],
             const SizedBox(height: 14),
             Text('Delivery OTP (relay this to the customer):', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
             const SizedBox(height: 8),
@@ -227,6 +242,22 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
           if (liveStatus != null)
             Text('Status: $liveStatus', style: TextStyle(color: AppColors.success, fontSize: 12)),
         ],
+        Row(children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: (o.shiprocketSynced ? AppColors.success : AppColors.warning).withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              o.shiprocketSynced ? 'In ShipRocket' : 'Not in ShipRocket',
+              style: TextStyle(
+                color: o.shiprocketSynced ? AppColors.success : AppColors.warning,
+                fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 0.4,
+              ),
+            ),
+          ),
+        ]),
         const SizedBox(height: 10),
         Row(children: [
           Text('₹${o.finalAmount.toStringAsFixed(2)}', style: const TextStyle(color: AppColors.coral, fontWeight: FontWeight.w900, fontSize: 16)),

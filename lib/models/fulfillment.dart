@@ -66,6 +66,8 @@ class FulfillmentOrder {
   final String? courierName;
   final String? shipmentStatus;
   final String? trackingUrl;
+  // True when the order has been pushed to ShipRocket at checkout.
+  final bool shiprocketSynced;
 
   FulfillmentOrder({
     required this.id,
@@ -87,6 +89,7 @@ class FulfillmentOrder {
     this.courierName,
     this.shipmentStatus,
     this.trackingUrl,
+    this.shiprocketSynced = false,
   });
 
   factory FulfillmentOrder.fromJson(Map<String, dynamic> json) {
@@ -113,6 +116,7 @@ class FulfillmentOrder {
       courierName: json['courier_name'] as String?,
       shipmentStatus: json['shipment_status'] as String?,
       trackingUrl: json['tracking_url'] as String?,
+      shiprocketSynced: json['shiprocket_synced'] as bool? ?? false,
     );
   }
 
