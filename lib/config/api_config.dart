@@ -11,6 +11,7 @@ class ApiConfig {
   static const String adminDelivery = '$apiPrefix/admin/delivery';
   static String adminDeliveryDispatch(String id) => '$apiPrefix/admin/delivery/$id/dispatch';
   static String adminDeliveryVerify(String id) => '$apiPrefix/admin/delivery/$id/verify';
+  static String adminDeliveryTracking(String id) => '$apiPrefix/admin/delivery/$id/tracking';
   static const String adminReturns = '$apiPrefix/admin/returns';
   static String adminReturnApprove(String id) => '$apiPrefix/admin/returns/$id/approve';
   static String adminReturnReject(String id) => '$apiPrefix/admin/returns/$id/reject';

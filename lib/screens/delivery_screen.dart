@@ -20,6 +20,10 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
   final AdminService _admin = AdminService(ApiService());
   List<FulfillmentOrder> _orders = [];
   bool _loading = true;
+  /// orderId -> live ShipRocket status string (from the tracking endpoint).
+  final Map<String, String> _liveStatus = {};
+  /// orderId -> true while a live refresh is in flight.
+  final Set<String> _refreshing = {};
 
   @override
   void initState() { super.initState(); _load(); }
@@ -29,6 +33,26 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
       final o = await _admin.getDeliveryOrders();
       if (mounted) setState(() { _orders = o; _loading = false; });
     } catch (_) { if (mounted) setState(() => _loading = false); }
+  }
+
+  /// Pulls the latest ShipRocket status for one in-transit order.
+  Future<void> _refreshTracking(FulfillmentOrder o) async {
+    if (_refreshing.contains(o.id)) return;
+    setState(() => _refreshing.add(o.id));
+    try {
+      final res = await _admin.getDeliveryTracking(o.id);
+      final live = (res['shipment_status'] as String?) ?? o.shipmentStatus;
+      if (mounted && live != null) {
+        setState(() { _liveStatus[o.id] = live; });
+      }
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not refresh tracking status')),
+      );
+    } finally {
+      if (mounted) setState(() => _refreshing.remove(o.id));
+    }
   }
 
   Color _sc(String s) {
@@ -178,6 +202,7 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
 
   Widget _deliveryCard(FulfillmentOrder o, {required bool dispatch}) {
     final sc = _sc(o.orderStatus);
+    final liveStatus = _liveStatus[o.id] ?? o.shipmentStatus;
     return ListCardShell(
       margin: const EdgeInsets.only(bottom: 10),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -199,13 +224,23 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
             Text('Courier: ${o.courierName}', style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w600, fontSize: 12)),
           if (o.awbCode != null)
             Text('AWB: ${o.awbCode}', style: TextStyle(color: AppColors.textMuted, fontSize: 12), maxLines: 1, overflow: TextOverflow.ellipsis),
-          if (o.shipmentStatus != null)
-            Text('Status: ${o.shipmentStatus}', style: TextStyle(color: AppColors.success, fontSize: 12)),
+          if (liveStatus != null)
+            Text('Status: $liveStatus', style: TextStyle(color: AppColors.success, fontSize: 12)),
         ],
         const SizedBox(height: 10),
         Row(children: [
           Text('₹${o.finalAmount.toStringAsFixed(2)}', style: const TextStyle(color: AppColors.coral, fontWeight: FontWeight.w900, fontSize: 16)),
           const Spacer(),
+          if (_refreshing.contains(o.id))
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
+            )
+          else if (o.trackingUrl != null || o.awbCode != null) ...[
+            FashionButton(label: 'Refresh', color: AppColors.info, icon: Icons.refresh,
+              onPressed: () => _refreshTracking(o)),
+            const SizedBox(width: 8),
+          ],
           if (o.trackingUrl != null) ...[
             FashionButton(label: 'Track', color: AppColors.info, icon: Icons.local_shipping, onPressed: () => _track(o.trackingUrl!)),
             const SizedBox(width: 8),

@@ -256,6 +256,12 @@ class AdminService {
     await _api.post(ApiConfig.adminDeliveryVerify(orderId), data: {'otp': otp});
   }
 
+  /// Live ShipRocket tracking for an in-transit order (fresh AWB status).
+  Future<Map<String, dynamic>> getDeliveryTracking(String orderId) async {
+    final response = await _api.get(ApiConfig.adminDeliveryTracking(orderId));
+    return (response.data as Map<String, dynamic>?) ?? {};
+  }
+
   Future<List<FulfillmentOrder>> getReturnOrders() async {
     final response = await _api.get(ApiConfig.adminReturns);
     return (response.data as List)
