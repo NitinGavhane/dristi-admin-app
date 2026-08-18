@@ -19,7 +19,7 @@ class AdminPaymentMethod {
     required this.name,
     this.description,
     this.iconUrl,
-    this.gateway = 'razorpay',
+    this.gateway = 'cashfree',
     this.regions = '*',
     this.isActive = true,
     this.sortOrder = 0,
@@ -32,7 +32,7 @@ class AdminPaymentMethod {
       name: json['name'] as String,
       description: json['description'] as String?,
       iconUrl: json['icon_url'] as String?,
-      gateway: (json['gateway'] as String?) ?? 'razorpay',
+      gateway: (json['gateway'] as String?) ?? 'cashfree',
       regions: (json['regions'] as String?) ?? '*',
       isActive: (json['is_active'] as bool?) ?? true,
       sortOrder: (json['sort_order'] as int?) ?? 0,
@@ -42,7 +42,7 @@ class AdminPaymentMethod {
   /// Human-readable regions for the list view.
   String get regionsLabel => regions.trim() == '*' ? 'ALL REGIONS' : regions.toUpperCase();
 
-  /// Gateways the Admin app can pick from. Only Razorpay is wired up today; the
+  /// Gateways the Admin app can pick from. Cashfree is wired up today; the
   /// field exists so adding a second one is configuration, not a schema change.
-  static const List<String> gatewayOptions = ['razorpay'];
+  static const List<String> gatewayOptions = ['cashfree'];
 }

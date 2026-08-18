@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart';
 import '../config/theme.dart';
 import '../models/category.dart';
 import '../services/api_service.dart';
@@ -119,6 +120,25 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
     );
   }
 
+  /// Pulls the API's `detail` message out of a request failure so the admin
+  /// sees the real reason (e.g. "A category named 'jeans' already exists")
+  /// instead of a raw DioException dump.
+  String _errorMessage(Object e) {
+    if (e is DioException) {
+      final data = e.response?.data;
+      if (data is Map && data['detail'] is String) return data['detail'] as String;
+      if (data is String && data.isNotEmpty) return data;
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        return 'Connection timed out. Check your network.';
+      }
+      if (e.type == DioExceptionType.connectionError) {
+        return 'No internet connection.';
+      }
+    }
+    return e.toString();
+  }
+
   // Pick, validate and upload an image, then put the returned URL into the
   // image field. The admin can still paste an external URL instead.
   Future<void> _pickAndUpload() async {
@@ -171,13 +191,15 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
           await _admin.createCategory({'name': categoryName, 'slug': '$gender-$gender', 'gender': gender, 'parent_id': newCat.id});
         }
       }
-      if (mounted) Navigator.pop(context);
-    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(e.toString().length > 80 ? e.toString().substring(0, 80) : e.toString()),
+          content: Text(_editId != null ? 'Category updated' : 'Category created'),
+          backgroundColor: AppColors.success,
         ));
+        Navigator.pop(context);
       }
+    } catch (e) {
+      if (mounted) _showError(_errorMessage(e));
     }
     if (mounted) setState(() => _saving = false);
   }

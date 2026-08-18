@@ -77,6 +77,8 @@ class AdminOrder {
 
   String get statusDisplay {
     switch (orderStatus) {
+      case 'pending_payment':
+        return 'Awaiting Payment';
       case 'placed':
         return 'Placed';
       case 'processing':

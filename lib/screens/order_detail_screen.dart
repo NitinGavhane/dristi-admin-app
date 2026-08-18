@@ -30,6 +30,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
   Color _sc(String s) {
     switch (s) {
+      case 'pending_payment': return AppColors.warning;
       case 'placed': return AppColors.info;
       case 'processing': return AppColors.warning;
       case 'dispatched': return AppColors.purple;
@@ -42,6 +43,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
   String _sd(String s) {
     switch (s) {
+      case 'pending_payment': return 'AWAITING PAYMENT';
       case 'placed': return 'PLACED';
       case 'processing': return 'PROCESSING';
       case 'dispatched': return 'DISPATCHED';

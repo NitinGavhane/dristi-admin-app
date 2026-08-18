@@ -169,6 +169,9 @@ class AppColors {
     letterSpacing: letterSpacing,
     color: color,
     height: height,
+  ).copyWith(
+    // Montserrat has no ₹ (U+20B9); Noto Sans (bundled) supplies the glyph.
+    fontFamilyFallback: const ['NotoSans'],
   );
 
   // Soft, minimal elevation (Haze/shadcn-style) — barely-there in light mode.

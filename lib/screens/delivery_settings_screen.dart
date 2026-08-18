@@ -22,7 +22,12 @@ class _DeliverySettingsScreenState extends State<DeliverySettingsScreen> {
   @override
   void initState() {
     super.initState();
-    void refresh() { if (mounted) setState(() {}); }
+    void refresh() {
+      // Typing a fee is intent to charge delivery — flip the toggle on so the
+      // seller isn't left wondering why the app still shows FREE.
+      if ((double.tryParse(_feeCtrl.text.trim()) ?? 0.0) > 0) _enabled = true;
+      if (mounted) setState(() {});
+    }
     _feeCtrl.addListener(refresh);
     _freeAboveCtrl.addListener(refresh);
     _load();
@@ -54,7 +59,7 @@ class _DeliverySettingsScreenState extends State<DeliverySettingsScreen> {
     final freeAbove = freeAboveText.isEmpty ? null : double.tryParse(freeAboveText);
     try {
       await _admin.updateDeliverySettings({
-        'enabled': _enabled,
+        'enabled': fee > 0 ? true : _enabled,
         'fee': fee,
         'free_above': freeAbove,
       });

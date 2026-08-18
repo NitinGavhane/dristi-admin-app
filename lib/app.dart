@@ -42,7 +42,9 @@ class AdminApp extends StatelessWidget {
             // Inter is the design-system body typeface (Dristi Fashions); explicit
             // TextStyles without a fontFamily inherit it via DefaultTextStyle.
             // Headings/labels opt into Montserrat via AppColors.heading(...).
-            textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme),
+            // NotoSans is the fallback for glyphs the web fonts lack (₹ etc.).
+            textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme)
+                .apply(fontFamilyFallback: const ['NotoSans']),
             colorScheme: ColorScheme.light(
               primary: AppColors.coral,
               secondary: AppColors.gold,
@@ -94,7 +96,8 @@ class AdminApp extends StatelessWidget {
           darkTheme: ThemeData(
             brightness: Brightness.dark,
             scaffoldBackgroundColor: AppColors.bg,
-            textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
+            textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme)
+                .apply(fontFamilyFallback: const ['NotoSans']),
             colorScheme: ColorScheme.dark(
               primary: AppColors.coral,
               secondary: AppColors.gold,

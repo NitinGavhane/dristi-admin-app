@@ -26,6 +26,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
   Color _sc(String s) {
     switch (s) {
+      case 'pending_payment': return AppColors.warning;
       case 'placed': return AppColors.info;
       case 'processing': return AppColors.warning;
       case 'dispatched': return AppColors.purple;
@@ -38,6 +39,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
   String _sd(String s) {
     switch (s) {
+      case 'pending_payment': return 'AWAITING PAYMENT';
       case 'placed': return 'PLACED';
       case 'processing': return 'PROCESSING';
       case 'dispatched': return 'DISPATCHED';
@@ -86,7 +88,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                             const SizedBox(height: 8),
                             Wrap(spacing: 4, children: [
                               Tag(text: _sd(o.orderStatus), color: sc),
-                              Tag(text: o.paymentStatus.toUpperCase(), color: o.paymentStatus == 'paid' ? AppColors.success : AppColors.warning),
+                              Tag(text: o.paymentStatus.toUpperCase(), color: o.paymentStatus == 'paid' ? AppColors.success : o.paymentStatus == 'refunded' ? AppColors.info : AppColors.warning),
                             ]),
                           ])),
                           Container(

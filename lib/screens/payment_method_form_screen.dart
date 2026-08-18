@@ -23,7 +23,7 @@ class _PaymentMethodFormScreenState extends State<PaymentMethodFormScreen> {
   final _sortC = TextEditingController(text: '0');
 
   String? _editId;
-  String _gateway = 'razorpay';
+  String _gateway = 'cashfree';
   bool _loading = false, _saving = false, _active = true;
 
   @override
@@ -150,7 +150,7 @@ class _PaymentMethodFormScreenState extends State<PaymentMethodFormScreen> {
                                     style: TextStyle(color: AppColors.textPrimary)),
                               ))
                           .toList(),
-                      onChanged: (v) => setState(() => _gateway = v ?? 'razorpay'),
+                      onChanged: (v) => setState(() => _gateway = v ?? 'cashfree'),
                     ),
                     StyledInput(controller: _regionsC, label: 'Regions', hint: '* or IN,AE'),
                     StyledInput(controller: _sortC, label: 'Sort Order', hint: '0 = first', number: true),
