@@ -1,4 +1,4 @@
-# garment_frontend
+# dristi-admin-app
 
 A new Flutter project.
 
