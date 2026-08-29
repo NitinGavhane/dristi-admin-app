@@ -1,5 +1,11 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'config/theme.dart';
 import 'providers/theme_provider.dart';
 import 'services/api_service.dart';
@@ -555,7 +561,7 @@ class AdminNavPanel extends StatelessWidget {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(11),
-                      child: Image.asset('assets/logo.jpg', fit: BoxFit.cover),
+                      child: Image.asset('assets/logo.png', fit: BoxFit.cover),
                     ),
                   ),
                   const SizedBox(height: 18),
@@ -1568,4 +1574,335 @@ class ImageUploadButton extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Live "how will my banner be cropped?" preview for the Banner form.
+///
+/// The same single image is shown in the Phone app's auto-sliding slider and
+/// on the Website hero. Both render with a cover-crop (an exact fit, cropping
+/// whatever doesn't fit) but at different frame ratios:
+///   • Phone slider  ≈ 3:2  (full-width × ~35% of the screen height)
+///   • Website desktop hero ≈ 16:7 (up to 1280px wide × 560px tall)
+///
+/// This widget decodes the real pixel size of the uploaded image and shows —
+/// side by side on wide screens, stacked on narrow ones — the exact crop each
+/// surface will show, plus a centre "safe zone" overlay. Text, faces, products
+/// and logos should be placed inside that highlighted centre area so nothing
+/// important gets cut on either device.
+class BannerCropPreview extends StatefulWidget {
+  final String? imageUrl;
+
+  const BannerCropPreview({super.key, required this.imageUrl});
+
+  @override
+  State<BannerCropPreview> createState() => _BannerCropPreviewState();
+}
+
+class _BannerCropPreviewState extends State<BannerCropPreview> {
+  // Frame ratios the cover-image must fill. Matching the real front-ends.
+  static const double _phoneRatio = 3 / 2; // user-app HeroBanner slider
+  static const double _webRatio = 16 / 7;  // website HeroCarousel desktop (1280×560)
+
+  double? _srcW;
+  double? _srcH;
+  bool _decoding = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _startDecode(widget.imageUrl);
+  }
+
+  @override
+  void didUpdateWidget(covariant BannerCropPreview oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.imageUrl != widget.imageUrl) _startDecode(widget.imageUrl);
+  }
+
+  Future<void> _startDecode(String? url) async {
+    _srcW = null;
+    _srcH = null;
+    if (url == null || url.isEmpty) {
+      setState(() => _decoding = false);
+      return;
+    }
+    setState(() => _decoding = true);
+    try {
+      final bytes = await _fetchBytes(url);
+      if (bytes == null) {
+        if (mounted) setState(() => _decoding = false);
+        return;
+      }
+      final codec = await ui.instantiateImageCodec(bytes);
+      final frame = await codec.getNextFrame();
+      if (mounted) {
+        setState(() {
+          _srcW = frame.image.width.toDouble();
+          _srcH = frame.image.height.toDouble();
+          _decoding = false;
+        });
+      }
+      frame.image.dispose();
+    } catch (_) {
+      if (mounted) setState(() => _decoding = false);
+    }
+  }
+
+  Future<Uint8List?> _fetchBytes(String url) async {
+    try {
+      final res = await Dio().get<List<int>>(
+        url,
+        options: Options(responseType: ResponseType.bytes, receiveTimeout: const Duration(seconds: 15)),
+      );
+      return res.data == null ? null : Uint8List.fromList(res.data!);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final url = widget.imageUrl ?? '';
+    final hasImage = url.isNotEmpty;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.borderLight),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          const Icon(Icons.content_cut, size: 16, color: AppColors.coral),
+          const SizedBox(width: 8),
+          Text('How your banner is cropped',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+        ]),
+        const SizedBox(height: 4),
+        Text(
+          'The same image feeds the App slider and the Website hero, sized differently '
+          "on each. What's shown below is exactly the crop each device would apply. "
+          'Keep text, faces and products inside the highlighted centre area.',
+          style: TextStyle(fontSize: 12, color: AppColors.textMuted, height: 1.4),
+        ),
+        if (!hasImage) ...[
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceAlt,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.borderLight),
+            ),
+            child: Column(children: [
+              Icon(Icons.image_search, size: 28, color: AppColors.textMuted),
+              const SizedBox(height: 8),
+              Text('Upload an image to preview the crop',
+                  style: TextStyle(fontSize: 12.5, color: AppColors.textMuted)),
+            ]),
+          ),
+        ] else ...[
+          const SizedBox(height: 10),
+          if (_decoding)
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              alignment: Alignment.center,
+              child: const SizedBox(
+                  width: 18, height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.coral)),
+            )
+          else if (_srcW != null && _srcH != null) ...[
+            _dimensionNote(),
+            const SizedBox(height: 12),
+            _surfaceFrame(
+              label: 'Phone app — auto slider',
+              ratio: _phoneRatio,
+              ratioLabel: '3:2',
+              note: _cropNote(_phoneRatio),
+            ),
+            const SizedBox(height: 14),
+            _surfaceFrame(
+              label: 'Website — hero banner',
+              ratio: _webRatio,
+              ratioLabel: '16:7',
+              note: _cropNote(_webRatio),
+            ),
+          ] else
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              alignment: Alignment.center,
+              child: Text("Couldn't read the image dimensions.",
+                  style: TextStyle(fontSize: 12.5, color: AppColors.textMuted)),
+            ),
+        ],
+      ]),
+    );
+  }
+
+  Widget _dimensionNote() {
+    final ratio = _srcW! / _srcH!;
+    final match = ratio < _phoneRatio
+        ? 'taller than recommended'
+        : ratio <= _webRatio
+            ? 'a good match'
+            : 'wider than recommended';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.coral.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.coral.withValues(alpha: 0.25)),
+      ),
+      child: Row(children: [
+        const Icon(Icons.tune, size: 15, color: AppColors.coral),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            'Your image: ${_srcW!.round()} × ${_srcH!.round()} px ($match). '
+            'Recommended: 1920 × 1080 px (16:9) or wider.',
+            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          ),
+        ),
+      ]),
+    );
+  }
+
+  /// Percentage caption describing how much of the source survives this crop.
+  String _cropNote(double targetRatio) {
+    final srcRatio = _srcW! / _srcH!;
+    // cover: the dimension that fills is fully shown; the other is cropped.
+    if (srcRatio > targetRatio) {
+      // source wider than frame → width crops, full height shown.
+      final visibleW = targetRatio * _srcH!; // width needed to hit target ratio at full height
+      final pctW = (visibleW / _srcW!).clamp(0.0, 1.0) * 100;
+      return 'Shows $pctW.round()% of the width (sides cropped), 100% of the height.';
+    } else if (srcRatio < targetRatio) {
+      final visibleH = _srcW! / targetRatio;
+      final pctH = (visibleH / _srcH!).clamp(0.0, 1.0) * 100;
+      return 'Shows 100% of the width, $pctH.round()% of the height (top/bottom cropped).';
+    }
+    return 'Shows the full image on this surface.';
+  }
+
+  Widget _surfaceFrame({
+    required String label,
+    required double ratio,
+    required String ratioLabel,
+    required String note,
+  }) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Row(children: [
+        Expanded(
+          child: Text(label,
+              style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.04),
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Text(ratioLabel,
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textMuted)),
+        ),
+      ]),
+      const SizedBox(height: 8),
+      ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: AspectRatio(
+          aspectRatio: ratio,
+          child: Stack(fit: StackFit.expand, children: [
+            CachedNetworkImage(
+              imageUrl: widget.imageUrl!,
+              fit: BoxFit.cover,
+              placeholder: (_, __) => Container(color: AppColors.surfaceAlt),
+              errorWidget: (_, __, ___) => Container(
+                color: AppColors.surfaceAlt,
+                child: Icon(Icons.broken_image_outlined, color: AppColors.textMuted),
+              ),
+            ),
+            CustomPaint(painter: _SafeZonePainter()),
+            Positioned(
+              left: 8,
+              right: 8,
+              bottom: 6,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.55),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(note,
+                      style: const TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.w500)),
+                ),
+              ),
+            ),
+          ]),
+        ),
+      ),
+    ]);
+  }
+}
+
+/// Dims the frame except a centre "safe zone" (60% of width × 50% of height)
+/// and draws a gold dashed border around that zone.
+class _SafeZonePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width, h = size.height;
+    final zW = w * 0.60, zH = h * 0.50;
+    final left = (w - zW) / 2, top = (h - zH) / 2;
+    final zone = Rect.fromLTWH(left, top, zW, zH);
+
+    final dim = Paint()..color = Colors.black.withValues(alpha: 0.42);
+    // Four rectangles around the transparent centre hole.
+    canvas.drawRect(Rect.fromLTRB(0, 0, w, top), dim);
+    canvas.drawRect(Rect.fromLTRB(0, top + zH, w, h), dim);
+    canvas.drawRect(Rect.fromLTRB(0, top, left, top + zH), dim);
+    canvas.drawRect(Rect.fromLTRB(left + zW, top, w, top + zH), dim);
+
+    final dash = Paint()
+      ..color = const Color(0xFFD4AF37)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    _drawDashedRect(canvas, zone, dash);
+
+    // "SAFE" tag
+    final tp = TextPainter(
+      text: const TextSpan(
+        text: 'SAFE ZONE',
+        style: TextStyle(color: Color(0xFFD4AF37), fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    tp.paint(canvas, Offset(left + 6, top + 6));
+  }
+
+  void _drawDashedRect(Canvas canvas, Rect r, Paint paint) {
+    const dash = 6.0;
+    // Top
+    _drawDash(canvas, Offset(r.left, r.top), Offset(r.right, r.top), dash, paint);
+    // Bottom
+    _drawDash(canvas, Offset(r.left, r.bottom), Offset(r.right, r.bottom), dash, paint);
+    // Left
+    _drawDash(canvas, Offset(r.left, r.top), Offset(r.left, r.bottom), dash, paint);
+    // Right
+    _drawDash(canvas, Offset(r.right, r.top), Offset(r.right, r.bottom), dash, paint);
+  }
+
+  void _drawDash(Canvas canvas, Offset a, Offset b, double dash, Paint paint) {
+    final total = (b - a).distance;
+    final segs = (total / dash).ceil();
+    for (var i = 0; i < segs; i++) {
+      final s = i * dash;
+      final e = (s + dash / 2).clamp(0.0, total);
+      if (s >= total) break;
+      canvas.drawLine(a + (b - a) * (s / total), a + (b - a) * (e / total), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _SafeZonePainter oldDelegate) => false;
 }

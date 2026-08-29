@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../config/theme.dart';
 import '../services/api_service.dart';
 import '../services/admin_service.dart';
@@ -26,15 +25,11 @@ class _BannerFormScreenState extends State<BannerFormScreen> {
 
   String? _editId;
   bool _loading = false, _saving = false, _active = true, _uploading = false;
-  String _imageUrl = '';
 
   @override
   void initState() {
     super.initState();
-    _imageC.addListener(() {
-      final trimmed = _imageC.text.trim();
-      if (trimmed != _imageUrl) setState(() => _imageUrl = trimmed);
-    });
+    _imageC.addListener(() => setState(() {}));
   }
 
   @override
@@ -151,33 +146,9 @@ class _BannerFormScreenState extends State<BannerFormScreen> {
                       hint: 'Upload above, or paste a URL',
                       validator: (v) => v?.trim().isEmpty == true ? 'Upload an image or provide a URL' : null,
                     ),
-                    if (_imageUrl.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 14),
-                        child: Stack(children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: AspectRatio(
-                              aspectRatio: 3 / 2,
-                              child: CachedNetworkImage(
-                                imageUrl: _imageUrl,
-                                fit: BoxFit.cover,
-                                placeholder: (_, __) => const Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.coral)),
-                                errorWidget: (_, __, ___) => Center(child: Icon(Icons.broken_image, color: AppColors.textMuted, size: 36)),
-                              ),
-                            ),
-                          ),
-                          Positioned(top: 6, right: 6, child: GestureDetector(
-                            onTap: () => _imageC.clear(),
-                            child: Container(
-                              width: 28, height: 28,
-                              decoration: AppColors.premiumGoldDeco(radius: 6),
-                              child: Icon(Icons.close, color: Colors.white, size: 16),
-                            ),
-                          )),
-                        ]),
-                      ),
                   ]),
+                  const SizedBox(height: 16),
+                  BannerCropPreview(imageUrl: _imageC.value.text.trim()),
                   const SizedBox(height: 16),
                   FormSection(title: 'Details (optional)', children: [
                     StyledInput(controller: _titleC, label: 'Title', hint: 'Shown for accessibility / future overlays'),

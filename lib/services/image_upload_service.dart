@@ -37,7 +37,7 @@ class ImageSpecs {
   });
 
   static const banner = ImageSpecs(
-    recWidth: 1536, recHeight: 1024, ratioLabel: '3:2', folder: ImageFolder.banners);
+    recWidth: 1920, recHeight: 1080, ratioLabel: '16:9', folder: ImageFolder.banners);
   static const product = ImageSpecs(
     recWidth: 1200, recHeight: 1600, ratioLabel: '3:4', folder: ImageFolder.products);
   static const category = ImageSpecs(

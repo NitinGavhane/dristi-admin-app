@@ -1,11 +1,11 @@
 {
-    "name": "garment_frontend",
-    "short_name": "garment_frontend",
+    "name": "Dristi Fashions Admin Panel",
+    "short_name": "Dristi Admin",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Dristi Fashions Admin Panel",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

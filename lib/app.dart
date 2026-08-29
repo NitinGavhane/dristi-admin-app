@@ -34,7 +34,7 @@ class AdminApp extends StatelessWidget {
       builder: (_, theme, __) {
         final isDark = theme.isDark;
         return MaterialApp(
-          title: 'Admin Panel',
+          title: 'Dristi Fashions Admin Panel',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             brightness: Brightness.light,
@@ -289,7 +289,7 @@ class _SplashGateState extends State<_SplashGate>
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(23),
-                    child: Image.asset('assets/logo.jpg', fit: BoxFit.cover),
+                    child: Image.asset('assets/logo.png', fit: BoxFit.cover),
                   ),
                 ),
                 const SizedBox(height: 24),
