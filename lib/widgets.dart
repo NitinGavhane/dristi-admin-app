@@ -73,6 +73,18 @@ class BrandHeader extends StatelessWidget {
                   leading,
                   const SizedBox(width: 16),
                 ],
+                Container(
+                  width: 40, height: 40,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.coral.withValues(alpha: 0.4), width: 1.2),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(9),
+                    child: Image.asset('assets/logo.png', fit: BoxFit.cover),
+                  ),
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
