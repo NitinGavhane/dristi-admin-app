@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'config/theme.dart';
 import 'providers/auth_provider.dart';
-import 'providers/theme_provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/users_screen.dart';
@@ -30,10 +29,7 @@ class AdminApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeProvider>(
-      builder: (_, theme, __) {
-        final isDark = theme.isDark;
-        return MaterialApp(
+    return MaterialApp(
           title: 'Dristi Fashions Admin Panel',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
@@ -93,60 +89,6 @@ class AdminApp extends StatelessWidget {
               },
             ),
           ),
-          darkTheme: ThemeData(
-            brightness: Brightness.dark,
-            scaffoldBackgroundColor: AppColors.bg,
-            textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme)
-                .apply(fontFamilyFallback: const ['NotoSans']),
-            colorScheme: ColorScheme.dark(
-              primary: AppColors.coral,
-              secondary: AppColors.gold,
-              surface: AppColors.surface,
-              error: AppColors.error,
-            ),
-            snackBarTheme: SnackBarThemeData(
-              backgroundColor: AppColors.surfaceAlt,
-              behavior: SnackBarBehavior.floating,
-              elevation: 8,
-              actionTextColor: AppColors.coral,
-              contentTextStyle: TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0.3),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-                side: BorderSide(color: AppColors.coral.withValues(alpha: 0.25), width: 1),
-              ),
-            ),
-            textSelectionTheme: TextSelectionThemeData(
-              cursorColor: AppColors.coral,
-              selectionColor: AppColors.coral.withValues(alpha: 0.22),
-              selectionHandleColor: AppColors.coral,
-            ),
-            progressIndicatorTheme: const ProgressIndicatorThemeData(color: AppColors.coral),
-            iconTheme: IconThemeData(color: AppColors.textSecondary),
-            tooltipTheme: TooltipThemeData(
-              decoration: BoxDecoration(
-                color: AppColors.surfaceRaised,
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: AppColors.coral.withValues(alpha: 0.25), width: 1),
-              ),
-              textStyle: TextStyle(color: AppColors.textPrimary, fontSize: 11, fontWeight: FontWeight.w600),
-            ),
-            dividerTheme: DividerThemeData(color: AppColors.borderLight, thickness: 1),
-            dialogTheme: DialogThemeData(
-              backgroundColor: AppColors.surface,
-              elevation: 16,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: BorderSide(color: AppColors.coral.withValues(alpha: 0.22), width: 1),
-              ),
-            ),
-            pageTransitionsTheme: PageTransitionsTheme(
-              builders: {
-                TargetPlatform.android: const FadeUpwardsPageTransitionsBuilder(),
-                TargetPlatform.iOS: const FadeUpwardsPageTransitionsBuilder(),
-              },
-            ),
-          ),
-          themeMode: isDark ? ThemeMode.dark : ThemeMode.light,
           // Responsive: on wide screens (tablet/desktop) the whole app is
           // centered and capped so content never stretches awkwardly; on phones
           // it fills the screen. The side gutters use a soft themed gradient.
@@ -206,8 +148,6 @@ class AdminApp extends StatelessWidget {
             '/messages': (_) => const MessagesScreen(),
           },
         );
-      },
-    );
   }
 }
 
@@ -289,7 +229,7 @@ class _SplashGateState extends State<_SplashGate>
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(23),
-                    child: Image.asset('assets/logo.png', fit: BoxFit.cover),
+                    child: Image.asset('assets/logo.jpg', fit: BoxFit.cover),
                   ),
                 ),
                 const SizedBox(height: 24),

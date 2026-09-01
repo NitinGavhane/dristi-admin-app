@@ -4,10 +4,8 @@ import 'dart:ui' as ui;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import 'config/theme.dart';
-import 'providers/theme_provider.dart';
 import 'services/api_service.dart';
 import 'services/image_upload_service.dart';
 
@@ -81,7 +79,7 @@ class BrandHeader extends StatelessWidget {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(9),
-                    child: Image.asset('assets/logo.png', fit: BoxFit.cover),
+                    child: Image.asset('assets/logo.jpg', fit: BoxFit.cover),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -573,7 +571,7 @@ class AdminNavPanel extends StatelessWidget {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(11),
-                      child: Image.asset('assets/logo.png', fit: BoxFit.cover),
+                      child: Image.asset('assets/logo.jpg', fit: BoxFit.cover),
                     ),
                   ),
                   const SizedBox(height: 18),
@@ -610,61 +608,6 @@ class AdminNavPanel extends StatelessWidget {
                   _navItem(Icons.share_outlined, 'Referrals', '/referrals', context),
                   _navItem(Icons.mail_outline, 'Messages', '/messages', context),
                 ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-              decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: AppColors.borderLight, width: 1)),
-              ),
-              child: Consumer<ThemeProvider>(
-                builder: (_, tp, __) {
-                  final dark = tp.isDark;
-                  return GestureDetector(
-                    onTap: () => tp.toggle(),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-                      decoration: dark
-                          ? AppColors.premiumGoldDeco(radius: 10)
-                          : BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [AppColors.purple40, AppColors.surfaceAlt],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              border: Border.all(color: AppColors.btnBorder, width: 1),
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: AppColors.shadowSm,
-                            ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 32, height: 32,
-                            decoration: BoxDecoration(
-                              color: (dark ? Colors.white : AppColors.coralDark).withValues(alpha: dark ? 0.20 : 0.16),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Icon(
-                              dark ? Icons.dark_mode : Icons.light_mode,
-                              color: dark ? Colors.white : AppColors.coralDark,
-                              size: 16,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            dark ? 'DARK MODE' : 'LIGHT MODE',
-                            style: AppColors.heading(
-                              color: dark ? Colors.white : AppColors.coralDark,
-                              size: 11,
-                              weight: FontWeight.w800,
-                              letterSpacing: 2.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
               ),
             ),
             const SizedBox(height: 8),
